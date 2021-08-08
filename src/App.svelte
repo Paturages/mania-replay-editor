@@ -215,8 +215,8 @@
       but all you need to know is that smaller is slower and bigger is faster.
       Just try and see what works I guess.
     </small>
-    <label>
-      <input type="range" bind:value={scrollSpeed} min="0" max="100" /> {scrollSpeed}
+    <label class="speed-container">
+      <input class="speed" type="range" bind:value={scrollSpeed} min="0" max="100" step="0.5" /> {scrollSpeed}
     </label>
   </p>
 
@@ -254,5 +254,15 @@
     text-align: left;
     max-width: 800px;
     margin: 1em auto;
+  }
+
+  .speed-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .speed {
+    width: 80%;
+    margin: 1em;
   }
 </style>
