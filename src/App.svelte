@@ -220,6 +220,11 @@
     </label>
   </p>
 
+  <p><small>
+    Notes: When you download the replay, save it somewhere, then open it (i.e. don't open it directly from the temp folder).<br />
+    Also keep in mind you have to delete existing scores from the replay before importing another one (i.e. when you're testing different scroll speeds)
+  </small></p>
+
   <button on:click={download}>
     Download edited replay
   </button>
