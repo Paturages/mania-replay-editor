@@ -1,5 +1,5 @@
 <script>
-  import { LZMA } from 'lzma/src/lzma_worker';
+  import LZMA from './lzma';
   import md5 from 'md5';
 
   let fileName = null;
@@ -86,7 +86,6 @@
       combo = readShort();
       perfect = readByte();
       mods = data.slice(offset, offset + 4); offset += 4;
-      console.log(mods);
       lifebar = readString();
       timestamp = data.slice(offset, offset + 8); offset += 8;
       length = readInteger();
@@ -164,7 +163,6 @@
       }).join(','),
       1
     );
-    console.log(compressResult, length, compressResult.length);
     intArray.push(...writeInteger(compressResult.length));
     intArray.push(...compressResult);
 
