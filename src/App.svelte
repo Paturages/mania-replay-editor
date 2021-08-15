@@ -27,7 +27,13 @@
   let length = null;
   let replayData = null;
   let unknown = null; // idk what that is, this is basically ported from node-osr
-  let scrollSpeed = 0;
+
+  let initialMapScrollSpeed = null;
+  let mapScrollSpeed = null;
+
+  let originalScrollSpeed = null;
+  let scrollSpeed = null;
+  
   let origbuffer = null;
 
   const onReplayChange = $event => {
@@ -93,10 +99,14 @@
       replayData = LZMA.decompress(data.slice(offset, offset + length)).split(','); offset += length;
       unknown = data.slice(offset);
 
-      scrollSpeed = +replayData.find(line => {
+      initialMapScrollSpeed = +replayData.find(line => {
         const [,, dist] = line.split('|');
         return +dist > 0;
       }).split('|')[2];
+      mapScrollSpeed = initialMapScrollSpeed;
+      if (scrollSpeed) {
+        adjustMapScrollSpeed({ target: { value: scrollSpeed } });
+      }
     }
     reader.readAsArrayBuffer(file);
   }
@@ -159,7 +169,7 @@
         if (!line.trim()) return line;
         const [t, x, dist, rest] = line.split('|');
         if (+dist <= 0) return line;
-        return [t, x, scrollSpeed, rest].join('|');
+        return [t, x, mapScrollSpeed, rest].join('|');
       }).join(','),
       1
     );
@@ -176,6 +186,17 @@
     link.href = URL.createObjectURL(new Blob([new Uint8Array(intArray).buffer], { type: 'application/osu' }));
     link.download = fileName;
     link.click();
+  }
+
+  const adjustScrollSpeed = $event => {
+    if (!originalScrollSpeed) return;
+    const newMapScrollSpeed = +$event.target.value;
+    scrollSpeed = (newMapScrollSpeed / initialMapScrollSpeed) * originalScrollSpeed;
+  }
+
+  const adjustMapScrollSpeed = $event => {
+    const newScrollSpeed = +$event.target.value;
+    mapScrollSpeed = (newScrollSpeed / originalScrollSpeed) * initialMapScrollSpeed;
   }
 </script>
 
@@ -207,22 +228,44 @@
     </label>
   </p>
 
-  <p>
+  <div class="container">
     Tweak scroll speed<br />
     <small>
       Note: This is <b>not</b> the osu!mania scroll speed and the scale will be different for every map
       (I have no idea what the value actually represents yet),
       but all you need to know is that smaller is slower and bigger is faster.
-      Just try and see what works I guess.
+      If you know the original scroll speed, you can input it and the target scroll speed you want and
+      this will scale the numbers accordingly. If not, you'll have to do trial and error on the "map scroll value"
+      (but honestly just open the original replay and check the scroll speed it's so much easier)
     </small>
-    <label class="speed-container">
-      <input class="speed" type="range" bind:value={scrollSpeed} min="0" max="100" step="0.5" /> {scrollSpeed}
-    </label>
-  </p>
+    <div class="speed-container">
+      <input class="speed" type="range" bind:value={originalScrollSpeed} min="0" max="40" step="1" />
+      <div class="speed-label">
+        original scroll speed = {originalScrollSpeed || '?'}
+      </div>
+    </div>
+    <div class="speed-container">
+      {#if !originalScrollSpeed}
+      <input class="speed" type="range" bind:value={mapScrollSpeed} min="0" max="100" step="0.5" />
+      <div class="speed-label">
+        map scroll value = {mapScrollSpeed}
+      </div>
+      {:else}
+      <input class="speed" type="range" bind:value={scrollSpeed} min="0" max="40" step="1" on:change={adjustMapScrollSpeed} />
+      <div class="speed-label">
+        wanted scroll speed = {scrollSpeed || originalScrollSpeed}<br />
+        (map scroll value = {mapScrollSpeed})
+      </div>
+      {/if}
+    </div>
+  </div>
 
-  <p><small>
-    Notes: When you download the replay, save it somewhere, then open it (i.e. don't open it directly from the temp folder).<br />
-    Also keep in mind you have to delete existing scores from the replay before importing another one (i.e. when you're testing different scroll speeds)
+  <p class="footnotes"><small>
+    Notes:<br />
+    When you download the replay, save it somewhere, then open it (i.e. don't open it directly from the temp folder).<br />
+    Also keep in mind you have to delete existing scores from the replay before importing another one (i.e. when you're testing different scroll speeds)<br /><br />
+    If you are dealing with multiple replays in a row, the original and wanted scroll speed values are kept and numbers are still scaled accordingly automatically,
+    so you can basically set those values before uploading, and then just brrrrrrr the replay files as long as they're the same scroll speed.
   </small></p>
 
   <button on:click={download}>
@@ -255,7 +298,7 @@
     cursor: pointer;
   }
 
-  p {
+  p, .container {
     text-align: left;
     max-width: 800px;
     margin: 1em auto;
@@ -266,8 +309,16 @@
     align-items: center;
   }
 
+  .speed-label {
+    width: 300px;
+  }
+
   .speed {
     width: 80%;
     margin: 1em;
+  }
+
+  .footnotes {
+    font-size: .8em;
   }
 </style>
