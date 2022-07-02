@@ -214,7 +214,7 @@
     game version = {gameVersion}<br />
     beatmap MD5 = {beatmapMD5}<br />
     replay MD5 = {replayMD5}<br />
-    replay player name = {player}<br />
+    replay player name = <input type="text" bind:value={player} /><br />
   </p>
 
   <p>
@@ -231,7 +231,7 @@
   <div class="container">
     Tweak scroll speed<br />
     <small>
-      Note: This is <b>not</b> the osu!mania scroll speed and the scale will be different for every map
+      Note: The "map scroll value" is <b>not</b> the osu!mania scroll speed and the scale will be different for every map
       (I have no idea what the value actually represents yet),
       but all you need to know is that smaller is slower and bigger is faster.
       If you know the original scroll speed, you can input it and the target scroll speed you want and
